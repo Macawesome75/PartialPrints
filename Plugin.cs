@@ -368,7 +368,7 @@ public class M75GetNotePatch
 [HarmonyPatch(typeof(EvidenceFingerprint), "GetNameForDataKey")]
 public class M75GetNameForDataKeyPatch
 {
-    public static string Postfix(EvidenceFingerprint __instance)
+    public static string Postfix(string __result, EvidenceFingerprint __instance, Il2CppSystem.Collections.Generic.List<Evidence.DataKey> inputKeys)
     {
         // Fingerprint evidence notes are always partial, this is the title of the window
         return $"Fingerprint ({PartialPrints.GetPrintPartial((uint)__instance.writer.humanID, __instance.evID)})";
