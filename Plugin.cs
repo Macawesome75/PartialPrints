@@ -396,6 +396,39 @@ public class M75EvidenceFingerprintControllerPatch
 
 #endregion
 
+#region Patch: GameplayController.AddNewMatch
+
+[HarmonyPatch(typeof(GameplayController), "AddNewMatch")]
+public class M75FactMatchesPatch
+{
+    // Makes it so that fingerprints don't auto connect facts.
+    public static bool Prefix(MatchPreset match, Evidence newEntry)
+    {
+        // If we've already processed it, ignore it.
+        if (PartialPrints.ProcessedMatchPresets.Contains(match))
+        {
+            return true;
+        }
+
+        for (int i = match.matchConditions.Count - 1; i >= 0; --i)
+        {
+            if (match.matchConditions._items[i] == MatchPreset.MatchCondition.fingerprint)
+            {
+                // We technically want to remove this, but the default if no conditions are present is to match. So instead, we change it to visualDescriptors.
+                // This will attempt to cast the EvidenceFingerprint to an EvidenceCitizen, fail, and return false...which is our end goal. It's a roundabout way to what we want.
+                match.matchConditions._items[i] = MatchPreset.MatchCondition.visualDescriptors;
+                //SOD.Common.Plugin.Log.LogInfo("Visualdescriptor");
+            }
+        }
+
+        // Keep track of what we've processed.
+        PartialPrints.ProcessedMatchPresets.Add(match);
+        return true;
+    }
+}
+
+#endregion
+
 #region Additional Structures
 
 public class ConfigEntryCache<T>
