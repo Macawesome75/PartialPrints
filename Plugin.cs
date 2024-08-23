@@ -56,6 +56,9 @@ public class PartialPrints : PluginController<PartialPrints>
         Harmony.PatchAll(Assembly.GetExecutingAssembly());
         Log.LogInfo("Plugin is patched.");
 
+        Lib.SaveGame.OnAfterNewGame -= OnAfterNewGame;
+        Lib.SaveGame.OnAfterNewGame += OnAfterNewGame;
+        
         Lib.SaveGame.OnAfterLoad -= OnAfterLoad;
         Lib.SaveGame.OnAfterLoad += OnAfterLoad;
 
@@ -64,13 +67,19 @@ public class PartialPrints : PluginController<PartialPrints>
 
     public override bool Unload()
     {
+        Lib.SaveGame.OnAfterNewGame -= OnAfterNewGame;
         Lib.SaveGame.OnAfterLoad -= OnAfterLoad;
         return base.Unload();
     }
 
+    private void OnAfterNewGame(object sender, EventArgs e)
+    {
+        Reinitialize();
+    }
+    
     private void OnAfterLoad(object save, SaveGameArgs args)
     {
-        ReinitializePostLoad();
+        Reinitialize();
     }
 
     private void InitializeConfig()
@@ -109,7 +118,7 @@ public class PartialPrints : PluginController<PartialPrints>
         ProcessedMatchPresets.Clear();
     }
 
-    private void ReinitializePostLoad()
+    private void Reinitialize()
     {
         // Make sure to clear our full print cache on load, so we're not carrying a bunch of citizens in memory from another city.
         _fullPrintCache.Clear();
